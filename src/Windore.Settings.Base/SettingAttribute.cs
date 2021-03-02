@@ -2,7 +2,7 @@
 
 namespace Windore.Settings.Base
 {
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class SettingAttribute : Attribute
     {
         public string Name { get; private set; }
