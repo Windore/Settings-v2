@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System;
 using System.Text;
+using System.Runtime.ExceptionServices;
 
 namespace Windore.Settings.Base
 {
@@ -85,6 +86,25 @@ namespace Windore.Settings.Base
             // since the converters dict contains multiple differently typed ConverFunctions
             var func = converters[prop.PropertyType];
             return (string)func.GetType().GetMethod("ConvertToString").Invoke(func, new [] { prop.GetValue(settingsObj) });
+        }
+
+        public void SetSettingValueFromString(string category, string settingName, string stringValue) 
+        {
+            PropertyInfo prop = categories[category].Settings[settingName];
+
+            // ConvertFromString method needs to be called dynamically
+            // since the converters dict contains multiple differently typed ConverFunctions
+            var func = converters[prop.PropertyType];
+
+            try 
+            {
+                var value = func.GetType().GetMethod("ConvertFromString").Invoke(func, new [] { stringValue });
+                prop.SetValue(settingsObj, value);
+            }
+            catch(TargetInvocationException ex) // This is used so that ArgumentExceptions from ConvertFunctions are thrown
+            {
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+            }
         }
 
         private void AddDefaultConvertFunctions() 
