@@ -69,6 +69,18 @@ namespace Windore.Settings.Base
             converters[typeof(TP)] = function;
         }
 
+        public object GetSettingValue(string category, string settingName) 
+        {
+            PropertyInfo prop = categories[category].Settings[settingName];
+            return prop.GetValue(settingsObj);
+        }
+
+        public void SetSettingValue(string category, string settingName, object newValue) 
+        {
+            PropertyInfo prop = categories[category].Settings[settingName];
+            prop.SetValue(settingsObj, newValue);
+        }
+
         public string GenerateSettingsString() 
         {
             // Categories and settings need to be sorted alphabetically
