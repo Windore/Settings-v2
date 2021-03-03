@@ -77,7 +77,7 @@ namespace Windore.Settings.Base
             return builder.ToString();
         }
 
-        private string GetSettingValueAsString(string category, string settingName) 
+        public string GetSettingValueAsString(string category, string settingName) 
         {
             PropertyInfo prop = categories[category].Settings[settingName];
 
