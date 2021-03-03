@@ -6,6 +6,36 @@ namespace Windore.Settings.Base.Tests
 {
     public class SettingsManagerTests
     {
+        private CustomSettingTestClass obj;
+        private SettingsManager<CustomSettingTestClass> manager;
+
+        private void AddCustomConverterToManager<T>(SettingsManager<T> manager) 
+        {
+            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
+            (
+                (cst) => $"{cst.X};{cst.Y}",
+                (str) => 
+                {
+                    // This is not actually safe, but for the tests it's fine
+                    if (!str.Contains(";")) throw new ArgumentException();
+                    string[] splt = str.Split(";");
+                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
+                }
+            ));
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            obj = new CustomSettingTestClass();
+            manager = new SettingsManager<CustomSettingTestClass>();
+
+            AddCustomConverterToManager<CustomSettingTestClass>(manager);
+            manager.SetSettingObject(obj);
+        }
+
+        #region SettingAttribute related tests
+
         private class ValidTestClass 
         {
             [Setting("prop", "category1")]
@@ -47,6 +77,33 @@ namespace Windore.Settings.Base.Tests
         private class EmptyTestClass 
         {
             public int Prop1 { get; set; }
+        }
+
+        private class InvalidSettingNameTestClass1
+        {
+            [Setting("pr#op1", "category1")]
+            public int Prop1 { get; set; }
+
+            [Setting("prop2", "category1")]
+            public int Prop2 { get; set; }
+        }
+
+        private class InvalidSettingNameTestClass2
+        {
+            [Setting("prop1", "categ:ory1")]
+            public int Prop1 { get; set; }
+
+            [Setting("prop2", "category1")]
+            public int Prop2 { get; set; }
+        }
+
+        private class InvalidSettingNameTestClass3
+        {
+            [Setting("prop1", "category1")]
+            public int Prop1 { get; set; }
+
+            [Setting("prop2", "categ=ory1")]
+            public int Prop2 { get; set; }
         }
 
         [Test]
@@ -105,33 +162,6 @@ namespace Windore.Settings.Base.Tests
             });
         }
 
-        private class InvalidSettingNameTestClass1
-        {
-            [Setting("pr#op1", "category1")]
-            public int Prop1 { get; set; }
-
-            [Setting("prop2", "category1")]
-            public int Prop2 { get; set; }
-        }
-
-        private class InvalidSettingNameTestClass2
-        {
-            [Setting("prop1", "categ:ory1")]
-            public int Prop1 { get; set; }
-
-            [Setting("prop2", "category1")]
-            public int Prop2 { get; set; }
-        }
-
-        private class InvalidSettingNameTestClass3
-        {
-            [Setting("prop1", "category1")]
-            public int Prop1 { get; set; }
-
-            [Setting("prop2", "categ=ory1")]
-            public int Prop2 { get; set; }
-        }
-
         [Test]
         public void SettingsManager_InvalidCharacterFails1() 
         {
@@ -164,6 +194,8 @@ namespace Windore.Settings.Base.Tests
                 manager.SetSettingObject(obj);
             });
         }
+
+        #endregion
 
         public class CustomClass
         {
@@ -207,22 +239,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueAsStringReturnsExpected() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             obj.Integer = 69;
             obj.Double = 9.9;
             obj.String = "Beep, Boop";
@@ -237,22 +253,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueAsStringFailsOnIncorrectSetting() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.GetSettingValueAsString("Default", "IDontExist")
             );
@@ -261,22 +261,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueAsStringFailsOnIncorrectCategory() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.GetSettingValueAsString("IDontExist", "IntegerSetting")
             );
@@ -285,22 +269,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingFromStringValueWorks() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             manager.SetSettingValueFromString("Default", "IntegerSetting", "-16");
             manager.SetSettingValueFromString("Default", "DoubleSetting", "0.98");
             manager.SetSettingValueFromString("General", "StringSetting", "GHRHPfasnk");
@@ -315,23 +283,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingFromStringThrowsOnInvalidString() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    if (!str.Contains(";")) throw new ArgumentException();
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<ArgumentException>(
                 () => manager.SetSettingValueFromString("Default", "IntegerSetting", "bbb")
             );
@@ -348,22 +299,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingValueFromStringFailsOnIncorrectSetting() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.SetSettingValueFromString("Default", "IDontExist", "val")
             );
@@ -372,22 +307,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingValueFromStringFailsOnIncorrectCategory() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.SetSettingValueFromString("IDontExist", "IntegerSetting", "val")
             );
@@ -396,46 +315,12 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected1() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.AreEqual(":Default:\nDoubleSetting=0\nIntegerSetting=0\n:General:\nCustomSetting=0;0\nStringSetting=\n", manager.GenerateSettingsString());
         }
 
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected2() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
-            Assert.AreEqual(":Default:\nDoubleSetting=0\nIntegerSetting=0\n:General:\nCustomSetting=0;0\nStringSetting=\n", manager.GenerateSettingsString());
-
             obj.Integer = -10;
             obj.Double = 1.5;
             obj.String = "Hello, World!";
@@ -447,22 +332,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringWorks() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             manager.ParseSettingsString(":Default:\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=#Hello=, World!:\n");
 
             Assert.AreEqual(-10, obj.Integer);
@@ -474,22 +343,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringWorksWithMissingSettings() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             manager.ParseSettingsString(":Default:\nIntegerSetting=-10\n:General:\nStringSetting=#Hello=, World!:\n");
 
             Assert.AreEqual(-10, obj.Integer);
@@ -501,22 +354,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringThrowsOnInvalidString1() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<FormatException>(
                 () => manager.ParseSettingsString("Default:\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n")
             );
@@ -525,22 +362,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringThrowsOnInvalidString2() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<FormatException>(
                 () => manager.ParseSettingsString(":Default:\nDoubleSetting:1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n")
             );
@@ -549,22 +370,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringThrowsOnNonExistingCategory() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.ParseSettingsString(":IDontExist:\n:Default:\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n")
             );
@@ -573,22 +378,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringThrowsOnNonExistingSetting() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.ParseSettingsString(":Default:\nIDontExist=10\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n")
             );
@@ -597,22 +386,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_ParseSettingStringThrowsOnInvalidStringValue() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<ArgumentException>(
                 () => manager.ParseSettingsString(":Default:\nDoubleSetting=ab\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n")
             );
@@ -621,22 +394,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueReturnsExpected1() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.AreEqual(obj.Integer, (int)manager.GetSettingValue("Default", "IntegerSetting"));
             Assert.AreEqual(obj.Double, (double)manager.GetSettingValue("Default", "DoubleSetting"));
             Assert.AreEqual(obj.String, (string)manager.GetSettingValue("General", "StringSetting"));
@@ -646,22 +403,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueReturnsExpected2() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             obj.Integer = 69;
             obj.Double = 9.9;
             obj.String = "Beep, Boop";
@@ -676,22 +417,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueFailsOnIncorrectSetting() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.GetSettingValue("Default", "IDontExist")
             );
@@ -700,22 +425,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueFailsOnIncorrectCategory() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.GetSettingValue("IDontExist", "IntegerSetting")
             );
@@ -724,22 +433,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingValueWorks() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             manager.SetSettingValue("Default", "IntegerSetting", -16);
             manager.SetSettingValue("Default", "DoubleSetting", 0.98);
             manager.SetSettingValue("General", "StringSetting", "GHRHPfasnk");
@@ -754,22 +447,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingValueFailsOnIncorrectSetting() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.SetSettingValue("Default", "IDontExist", 10)
             );
@@ -778,22 +455,6 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingValueFailsOnIncorrectCategory() 
         {
-            CustomSettingTestClass obj = new CustomSettingTestClass();
-            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
-
-            manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
-            (
-                (cst) => $"{cst.X};{cst.Y}",
-                (str) => 
-                {
-                    // This is not actually safe, but for the test it's fine
-                    string[] splt = str.Split(";");
-                    return new CustomClass(int.Parse(splt[0]), int.Parse(splt[1]));
-                }
-            ));
-
-            manager.SetSettingObject(obj);
-
             Assert.Throws<KeyNotFoundException>(
                 () => manager.SetSettingValue("IDontExist", "IntegerSetting", 10)
             );
