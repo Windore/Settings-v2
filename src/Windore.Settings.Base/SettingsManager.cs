@@ -78,6 +78,43 @@ namespace Windore.Settings.Base
             return builder.ToString();
         }
 
+        public void ParseSettingsString(string settingsString) 
+        {
+            string[] lines = settingsString.Split("\n");
+            string currentCategory = string.Empty;
+            int lineNum = 0;
+
+            foreach(string line in lines) 
+            {
+                lineNum++;
+
+                if (line.StartsWith('#') || string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                if (line.StartsWith(':') && line.EndsWith(':'))
+                {
+                    currentCategory = line.Substring(1, line.Length - 2);
+
+                    if (!categories.ContainsKey(currentCategory)) 
+                    {
+                        throw new KeyNotFoundException($"The given key '{currentCategory}' was not present in the dictionary.");
+                    }
+                    
+                    continue;
+                }
+
+                if (!line.Contains('=')) 
+                {
+                    throw new FormatException($"Missing a '=' at line {lineNum}.");
+                }
+
+                string[] lineDt = line.Split('=', 2);
+                SetSettingValueFromString(currentCategory, lineDt[0], lineDt[1]);
+            }
+        }
+
         public string GetSettingValueAsString(string category, string settingName) 
         {
             PropertyInfo prop = categories[category].Settings[settingName];
