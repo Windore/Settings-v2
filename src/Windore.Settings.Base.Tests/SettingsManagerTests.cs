@@ -14,7 +14,7 @@ namespace Windore.Settings.Base.Tests
             public int Prop2 { get; set; } = 0;
         }
 
-        private class InvalidTestClass 
+        private class DuplicateNamesTestClass 
         {
             [Setting("prop", "category1")]
             public int Prop1 { get; set; }
@@ -23,13 +23,24 @@ namespace Windore.Settings.Base.Tests
             public int Prop2 { get; set; }
         }
 
-        private class InvalidTestClass1
+        private class ReadOnlyPropertyTestClass
         {
             [Setting("prop1", "category1")]
             public int Prop1 { get; }
 
             [Setting("prop2", "category1")]
             public int Prop2 { get; set; }
+        }
+
+        private class WriteOnlyPropertyTestClass
+        {
+            int f;
+
+            [Setting("prop1", "category1")]
+            public int Prop1 { get; set; }
+
+            [Setting("prop2", "category1")]
+            public int Prop2 { private get => f; set => f = value; }
         }
 
         private class EmptyTestClass 
@@ -40,8 +51,8 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_InvalidClassFailsFromDuplicates()
         {
-            InvalidTestClass obj = new InvalidTestClass();
-            SettingsManager<InvalidTestClass> manager = new SettingsManager<InvalidTestClass>();
+            DuplicateNamesTestClass obj = new DuplicateNamesTestClass();
+            SettingsManager<DuplicateNamesTestClass> manager = new SettingsManager<DuplicateNamesTestClass>();
 
 
             Assert.Throws<DuplicateNameInCategoryException>(() => {
@@ -74,37 +85,26 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_InvalidClassFailsFromReadOnly()
         {
-            InvalidTestClass1 obj = new InvalidTestClass1();
-            SettingsManager<InvalidTestClass1> manager = new SettingsManager<InvalidTestClass1>();
+            ReadOnlyPropertyTestClass obj = new ReadOnlyPropertyTestClass();
+            SettingsManager<ReadOnlyPropertyTestClass> manager = new SettingsManager<ReadOnlyPropertyTestClass>();
 
             Assert.Throws<NonReadWriteSettingException>(() => {
                 manager.SetSettingObject(obj);
             });
-        }
-
-        private class InvalidTestClass5
-        {
-            int f;
-
-            [Setting("prop1", "category1")]
-            public int Prop1 { get; set; }
-
-            [Setting("prop2", "category1")]
-            public int Prop2 { private get => f; set => f = value; }
         }
 
         [Test]
         public void SettingsManager_InvalidClassFailsFromWriteOnly()
         {
-            InvalidTestClass5 obj = new InvalidTestClass5();
-            SettingsManager<InvalidTestClass5> manager = new SettingsManager<InvalidTestClass5>();
+            WriteOnlyPropertyTestClass obj = new WriteOnlyPropertyTestClass();
+            SettingsManager<WriteOnlyPropertyTestClass> manager = new SettingsManager<WriteOnlyPropertyTestClass>();
 
             Assert.Throws<NonReadWriteSettingException>(() => {
                 manager.SetSettingObject(obj);
             });
         }
 
-        private class InvalidTestClass2
+        private class InvalidSettingNameTestClass1
         {
             [Setting("pr#op1", "category1")]
             public int Prop1 { get; set; }
@@ -113,18 +113,7 @@ namespace Windore.Settings.Base.Tests
             public int Prop2 { get; set; }
         }
 
-        [Test]
-        public void SettingsManager_InvalidCharacterFails1() 
-        {
-            InvalidTestClass2 obj = new InvalidTestClass2();
-            SettingsManager<InvalidTestClass2> manager = new SettingsManager<InvalidTestClass2>();
-
-            Assert.Throws<InvalidNameException>(() => {
-                manager.SetSettingObject(obj);
-            });
-        }
-
-        private class InvalidTestClass3
+        private class InvalidSettingNameTestClass2
         {
             [Setting("prop1", "categ:ory1")]
             public int Prop1 { get; set; }
@@ -133,18 +122,7 @@ namespace Windore.Settings.Base.Tests
             public int Prop2 { get; set; }
         }
 
-        [Test]
-        public void SettingsManager_InvalidCharacterFails2() 
-        {
-            InvalidTestClass3 obj = new InvalidTestClass3();
-            SettingsManager<InvalidTestClass3> manager = new SettingsManager<InvalidTestClass3>();
-
-            Assert.Throws<InvalidNameException>(() => {
-                manager.SetSettingObject(obj);
-            });
-        }
-
-        private class InvalidTestClass4
+        private class InvalidSettingNameTestClass3
         {
             [Setting("prop1", "category1")]
             public int Prop1 { get; set; }
@@ -154,10 +132,32 @@ namespace Windore.Settings.Base.Tests
         }
 
         [Test]
+        public void SettingsManager_InvalidCharacterFails1() 
+        {
+            InvalidSettingNameTestClass1 obj = new InvalidSettingNameTestClass1();
+            SettingsManager<InvalidSettingNameTestClass1> manager = new SettingsManager<InvalidSettingNameTestClass1>();
+
+            Assert.Throws<InvalidNameException>(() => {
+                manager.SetSettingObject(obj);
+            });
+        }
+
+        [Test]
+        public void SettingsManager_InvalidCharacterFails2() 
+        {
+            InvalidSettingNameTestClass2 obj = new InvalidSettingNameTestClass2();
+            SettingsManager<InvalidSettingNameTestClass2> manager = new SettingsManager<InvalidSettingNameTestClass2>();
+
+            Assert.Throws<InvalidNameException>(() => {
+                manager.SetSettingObject(obj);
+            });
+        }
+
+        [Test]
         public void SettingsManager_InvalidCharacterFails3() 
         {
-            InvalidTestClass4 obj = new InvalidTestClass4();
-            SettingsManager<InvalidTestClass4> manager = new SettingsManager<InvalidTestClass4>();
+            InvalidSettingNameTestClass3 obj = new InvalidSettingNameTestClass3();
+            SettingsManager<InvalidSettingNameTestClass3> manager = new SettingsManager<InvalidSettingNameTestClass3>();
 
             Assert.Throws<InvalidNameException>(() => {
                 manager.SetSettingObject(obj);
@@ -176,7 +176,7 @@ namespace Windore.Settings.Base.Tests
             }
         }
 
-        private class SettingClass 
+        private class CustomSettingTestClass 
         {
             [Setting("IntegerSetting", "Default")]
             public int Integer { get; set; } = 0;
@@ -191,8 +191,8 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected1() 
         {
-            SettingClass obj = new SettingClass();
-            SettingsManager<SettingClass> manager = new SettingsManager<SettingClass>();
+            CustomSettingTestClass obj = new CustomSettingTestClass();
+            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
 
             manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
             (
@@ -213,8 +213,8 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected2() 
         {
-            SettingClass obj = new SettingClass();
-            SettingsManager<SettingClass> manager = new SettingsManager<SettingClass>();
+            CustomSettingTestClass obj = new CustomSettingTestClass();
+            SettingsManager<CustomSettingTestClass> manager = new SettingsManager<CustomSettingTestClass>();
 
             manager.AddConvertFunction<CustomClass>(new ConvertFunction<CustomClass>
             (
