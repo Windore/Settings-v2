@@ -170,7 +170,21 @@ namespace Windore.Settings.Base
                         return num;
                     }
 
-                    throw new ArgumentException($"Cannot parse string {str} to int");
+                    throw new ArgumentException($"Cannot parse string {str} to double");
+                }
+            ));
+
+            AddConvertFunction<bool>(new ConvertFunction<bool>
+            (
+                (bol) => bol ? "true" : "false",
+                (str) => 
+                {
+                    if (bool.TryParse(str, out bool bol)) 
+                    {
+                        return bol;
+                    }
+
+                    throw new ArgumentException($"Cannot parse string {str} to bool");
                 }
             ));
 

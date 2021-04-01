@@ -226,6 +226,8 @@ namespace Windore.Settings.Base.Tests
 
         private class CustomSettingTestClass 
         {
+            [Setting("BooleanSetting", "Default")]
+            public bool Boolean { get; set; } = false;
             [Setting("IntegerSetting", "Default")]
             public int Integer { get; set; } = 0;
             [Setting("DoubleSetting", "Default")]
@@ -239,11 +241,13 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueAsStringReturnsExpected() 
         {
+            obj.Boolean = true;
             obj.Integer = 69;
             obj.Double = 9.9;
             obj.String = "Beep, Boop";
             obj.Custom = new CustomClass(8, 9);
 
+            Assert.AreEqual("true", manager.GetSettingValueAsString("Default", "BooleanSetting"));
             Assert.AreEqual("69", manager.GetSettingValueAsString("Default", "IntegerSetting"));
             Assert.AreEqual("9.9", manager.GetSettingValueAsString("Default", "DoubleSetting"));
             Assert.AreEqual("Beep, Boop", manager.GetSettingValueAsString("General", "StringSetting"));
@@ -269,11 +273,13 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingFromStringValueWorks() 
         {
+            manager.SetSettingValueFromString("Default", "BooleanSetting", "false");
             manager.SetSettingValueFromString("Default", "IntegerSetting", "-16");
             manager.SetSettingValueFromString("Default", "DoubleSetting", "0.98");
             manager.SetSettingValueFromString("General", "StringSetting", "GHRHPfasnk");
             manager.SetSettingValueFromString("General", "CustomSetting", "-8;9");
 
+            Assert.AreEqual(false, obj.Boolean);
             Assert.AreEqual(-16, obj.Integer);
             Assert.AreEqual(0.98d, obj.Double);
             Assert.AreEqual("GHRHPfasnk", obj.String);
@@ -283,6 +289,10 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingFromStringThrowsOnInvalidString() 
         {
+            Assert.Throws<ArgumentException>(
+                () => manager.SetSettingValueFromString("Default", "BooleanSetting", "totta")
+            );
+
             Assert.Throws<ArgumentException>(
                 () => manager.SetSettingValueFromString("Default", "IntegerSetting", "bbb")
             );
@@ -315,25 +325,27 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected1() 
         {
-            Assert.AreEqual(":Default:\nDoubleSetting=0\nIntegerSetting=0\n:General:\nCustomSetting=0;0\nStringSetting=\n", manager.GenerateSettingsString());
+            Assert.AreEqual(":Default:\nBooleanSetting=false\nDoubleSetting=0\nIntegerSetting=0\n:General:\nCustomSetting=0;0\nStringSetting=\n", manager.GenerateSettingsString());
         }
 
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected2() 
         {
+            obj.Boolean = true;
             obj.Integer = -10;
             obj.Double = 1.5;
             obj.String = "Hello, World!";
             obj.Custom = new CustomClass(9, -30);
 
-            Assert.AreEqual(":Default:\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n", manager.GenerateSettingsString());
+            Assert.AreEqual(":Default:\nBooleanSetting=true\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n", manager.GenerateSettingsString());
         }
 
         [Test]
         public void SettingsManager_ParseSettingStringWorks() 
         {
-            manager.ParseSettingsString(":Default:\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=#Hello=, World!:\n");
+            manager.ParseSettingsString(":Default:\nBooleanSetting=true\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=#Hello=, World!:\n");
 
+            Assert.AreEqual(true, obj.Boolean);
             Assert.AreEqual(-10, obj.Integer);
             Assert.AreEqual(1.5, obj.Double);
             Assert.AreEqual("#Hello=, World!:", obj.String);
@@ -394,6 +406,7 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueReturnsExpected1() 
         {
+            Assert.AreEqual(obj.Boolean, (bool)manager.GetSettingValue("Default", "BooleanSetting"));
             Assert.AreEqual(obj.Integer, (int)manager.GetSettingValue("Default", "IntegerSetting"));
             Assert.AreEqual(obj.Double, (double)manager.GetSettingValue("Default", "DoubleSetting"));
             Assert.AreEqual(obj.String, (string)manager.GetSettingValue("General", "StringSetting"));
@@ -403,11 +416,13 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GetSettingValueReturnsExpected2() 
         {
+            obj.Boolean = true;
             obj.Integer = 69;
             obj.Double = 9.9;
             obj.String = "Beep, Boop";
             obj.Custom = new CustomClass(8, 9);
 
+            Assert.AreEqual(obj.Boolean, (bool)manager.GetSettingValue("Default", "BooleanSetting"));
             Assert.AreEqual(obj.Integer, (int)manager.GetSettingValue("Default", "IntegerSetting"));
             Assert.AreEqual(obj.Double, (double)manager.GetSettingValue("Default", "DoubleSetting"));
             Assert.AreEqual(obj.String, (string)manager.GetSettingValue("General", "StringSetting"));
@@ -433,11 +448,13 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_SetSettingValueWorks() 
         {
+            manager.SetSettingValue("Default", "BooleanSetting", true);
             manager.SetSettingValue("Default", "IntegerSetting", -16);
             manager.SetSettingValue("Default", "DoubleSetting", 0.98);
             manager.SetSettingValue("General", "StringSetting", "GHRHPfasnk");
             manager.SetSettingValue("General", "CustomSetting", new CustomClass(-8, 9));
 
+            Assert.AreEqual(true, obj.Boolean);
             Assert.AreEqual(-16, obj.Integer);
             Assert.AreEqual(0.98, obj.Double);
             Assert.AreEqual("GHRHPfasnk", obj.String);
