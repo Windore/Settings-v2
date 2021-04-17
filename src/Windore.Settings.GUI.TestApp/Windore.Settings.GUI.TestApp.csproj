@@ -1,7 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,9 +10,10 @@
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.0" />
    </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\Windore.Settings.Base\Windore.Settings.Base.csproj" />
+    <ProjectReference Include="..\Windore.Settings.GUI\Windore.Settings.GUI.csproj" />
   </ItemGroup>
 
 </Project>
