@@ -49,6 +49,11 @@ namespace Windore.Settings.Base
             prop.SetValue(settingsObj, newValue);
         }
 
+        public Type GetSettingType(string category, string settingName) 
+        {
+            return categories[category].Settings[settingName].PropertyType;
+        }
+
         public Dictionary<string, List<string>> GetSettings() 
         {
             var settings = new Dictionary<string, List<string>>();

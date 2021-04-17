@@ -491,5 +491,15 @@ namespace Windore.Settings.Base.Tests
 
             CollectionAssert.AreEquivalent(expected, result);
         }
+
+        [Test]
+        public void SettingsManager_GetSettingTypeReturnsCorrect() 
+        {
+            Assert.AreEqual(typeof(bool), manager.GetSettingType("Default", "BooleanSetting"));
+            Assert.AreEqual(typeof(int), manager.GetSettingType("Default", "IntegerSetting"));
+            Assert.AreEqual(typeof(double), manager.GetSettingType("Default", "DoubleSetting"));
+            Assert.AreEqual(typeof(string), manager.GetSettingType("General", "StringSetting"));
+            Assert.AreEqual(typeof(CustomClass), manager.GetSettingType("General", "CustomSetting"));
+        }
     }
 }
