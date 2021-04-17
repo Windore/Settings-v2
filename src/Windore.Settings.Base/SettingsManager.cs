@@ -49,6 +49,24 @@ namespace Windore.Settings.Base
             prop.SetValue(settingsObj, newValue);
         }
 
+        public Dictionary<string, List<string>> GetSettings() 
+        {
+            var settings = new Dictionary<string, List<string>>();
+            foreach (string category in categories.Keys) 
+            {
+                List<string> settingsInCat = new List<string>();
+
+                foreach(string setting in categories[category].Settings.Keys) 
+                {
+                    settingsInCat.Add(setting);
+                }
+
+                settings[category] = settingsInCat;
+            }
+
+            return settings;
+        }
+
         public string GenerateSettingsString() 
         {
             // Categories and settings need to be sorted alphabetically

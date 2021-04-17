@@ -476,5 +476,20 @@ namespace Windore.Settings.Base.Tests
                 () => manager.SetSettingValue("IDontExist", "IntegerSetting", 10)
             );
         }
+
+        [Test]
+        public void SettingsManager_GetSettingsReturnsAllSettings() 
+        {
+            var expected = new Dictionary<string, List<string>> 
+                {
+                    { "Default", new List<string>() { "BooleanSetting", "IntegerSetting", "DoubleSetting"} },
+                    { "General", new List<string>() { "StringSetting", "CustomSetting" } }
+                };
+
+            
+            var result = manager.GetSettings();
+
+            CollectionAssert.AreEquivalent(expected, result);
+        }
     }
 }
