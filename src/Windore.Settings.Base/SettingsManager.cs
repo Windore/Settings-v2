@@ -6,7 +6,7 @@ using System.Runtime.ExceptionServices;
 
 namespace Windore.Settings.Base
 {
-    public class SettingsManager<T>
+    public class SettingsManager<T> : ISettingsManager
     {
         private class Category
         {
