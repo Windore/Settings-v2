@@ -2,5 +2,6 @@
 bin/
 obj/
 
-# Ignore vscode folder
+# Ignore .vscode and .vs folder
 .vscode/
+.vs/
