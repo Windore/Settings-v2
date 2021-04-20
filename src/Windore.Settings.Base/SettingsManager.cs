@@ -46,6 +46,16 @@ namespace Windore.Settings.Base
         public void SetSettingValue(string category, string settingName, object newValue) 
         {
             PropertyInfo prop = categories[category].Settings[settingName];
+
+            SettingValueCheckAttribute attribute = prop.GetCustomAttribute<SettingValueCheckAttribute>();
+            if (attribute != null) 
+            {
+                if (!attribute.CheckValue(newValue)) 
+                {
+                    throw new ArgumentException($"Invalid value '{newValue}' for setting '{settingName}' in category '{category}'");
+                }
+            }
+
             prop.SetValue(settingsObj, newValue);
         }
 
@@ -159,7 +169,7 @@ namespace Windore.Settings.Base
             try 
             {
                 var value = func.GetType().GetMethod("ConvertFromString").Invoke(func, new [] { stringValue });
-                prop.SetValue(settingsObj, value);
+                SetSettingValue(category, settingName, value);
             }
             catch(TargetInvocationException ex) // This is used so that ArgumentExceptions from ConvertFunctions are thrown
             {
