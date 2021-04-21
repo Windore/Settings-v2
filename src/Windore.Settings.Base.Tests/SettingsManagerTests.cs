@@ -325,7 +325,7 @@ namespace Windore.Settings.Base.Tests
         [Test]
         public void SettingsManager_GenerateStringReturnsExpected1() 
         {
-            Assert.AreEqual(":Default:\nBooleanSetting=false\nDoubleSetting=0\nIntegerSetting=0\n:General:\nCustomSetting=0;0\nStringSetting=\n", manager.GenerateSettingsString());
+            Assert.AreEqual(":Default:\nBooleanSetting=false\nDoubleSetting=0\nIntegerSetting=0\n:General:\nCustomSetting=0;0\nStringSetting=\n".Replace("\n", Environment.NewLine), manager.GenerateSettingsString());
         }
 
         [Test]
@@ -337,7 +337,7 @@ namespace Windore.Settings.Base.Tests
             obj.String = "Hello, World!";
             obj.Custom = new CustomClass(9, -30);
 
-            Assert.AreEqual(":Default:\nBooleanSetting=true\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n", manager.GenerateSettingsString());
+            Assert.AreEqual(":Default:\nBooleanSetting=true\nDoubleSetting=1.5\nIntegerSetting=-10\n:General:\nCustomSetting=9;-30\nStringSetting=Hello, World!\n".Replace("\n", Environment.NewLine), manager.GenerateSettingsString());
         }
 
         [Test]

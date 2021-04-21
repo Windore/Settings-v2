@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Runtime.ExceptionServices;
+using System.Globalization;
 
 namespace Windore.Settings.Base
 {
@@ -195,10 +196,10 @@ namespace Windore.Settings.Base
 
             AddConvertFunction<double>(new ConvertFunction<double>
             (
-                (num) => num.ToString(),
+                (num) => num.ToString(CultureInfo.GetCultureInfo("en-US")),
                 (str) => 
                 {
-                    if (double.TryParse(str, out double num)) 
+                    if (double.TryParse(str.Replace(',', '.'), NumberStyles.Float, CultureInfo.GetCultureInfo("en-US"), out double num)) 
                     {
                         return num;
                     }
