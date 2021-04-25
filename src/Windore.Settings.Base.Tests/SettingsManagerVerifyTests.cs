@@ -30,8 +30,9 @@ namespace Windore.Settings.Base.Tests
 
         class CustomCheckAttribute : SettingValueCheckAttribute 
         {
-            public override bool CheckValue(object value)
+            public override bool CheckValue(object value, out string msg)
             {
+                msg = "";
                 if (value is int num) 
                 {
                     return num == 40;

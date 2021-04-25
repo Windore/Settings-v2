@@ -48,13 +48,9 @@ namespace Windore.Settings.Base
         {
             PropertyInfo prop = categories[category].Settings[settingName];
 
-            SettingValueCheckAttribute attribute = prop.GetCustomAttribute<SettingValueCheckAttribute>();
-            if (attribute != null) 
+            if (!CheckValueForSetting(category, settingName, newValue, out string message)) 
             {
-                if (!attribute.CheckValue(newValue)) 
-                {
-                    throw new ArgumentException($"Invalid value '{newValue}' for setting '{settingName}' in category '{category}'");
-                }
+                throw new ArgumentException($"Invalid value: '{newValue}' for setting: '{settingName}' in category: '{category}'. Reason: '{message}'");
             }
 
             prop.SetValue(settingsObj, newValue);
@@ -63,6 +59,48 @@ namespace Windore.Settings.Base
         public Type GetSettingType(string category, string settingName) 
         {
             return categories[category].Settings[settingName].PropertyType;
+        }
+
+        public bool CheckStringValueForSetting(string category, string settingName, string stringValue, out string message) 
+        {
+            PropertyInfo prop = categories[category].Settings[settingName];
+
+            // ConvertFromString method needs to be called dynamically
+            // since the converters dict contains multiple differently typed ConverFunctions
+            var func = converters[prop.PropertyType];
+            object value;
+
+            try 
+            {
+                value = func.GetType().GetMethod("ConvertFromString").Invoke(func, new [] { stringValue });
+                SetSettingValue(category, settingName, value);
+            }
+            catch(TargetInvocationException) // This is used so that ArgumentExceptions from ConvertFunctions are thrown
+            {
+                message = $"Cannot convert string: '{stringValue}' to type: '{prop.PropertyType}'";
+                return false;
+            }
+
+            bool valid = CheckValueForSetting(category, settingName, value, out string msg);
+
+            message = msg;
+            return valid;
+        }
+
+        public bool CheckValueForSetting(string category, string settingName, object value, out string message) 
+        {
+            PropertyInfo prop = categories[category].Settings[settingName];
+            
+            SettingValueCheckAttribute attribute = prop.GetCustomAttribute<SettingValueCheckAttribute>();
+            if (attribute != null) 
+            {
+                bool valid = attribute.CheckValue(value, out string message1);
+                message = message1;
+                return valid;
+            }
+
+            message = "";
+            return true;
         }
 
         public Dictionary<string, List<string>> GetSettings() 

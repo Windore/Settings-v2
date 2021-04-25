@@ -13,12 +13,26 @@ namespace Windore.Settings.Base
             max = maxValue;
         }
 
-        public override bool CheckValue(object value) 
+        public override bool CheckValue(object value, out string message) 
         {
             if (value is int number) 
             {
-                return number > min && number < max;
+                if (number < min) 
+                {
+                    message = "Given value is too small";
+                    return false;
+                }
+                if (number > max) 
+                {
+                    message = "Given value is too large";
+                    return false;
+                }
+                message = "";
+                return true;
             }
+
+            message = "Not a number";
+
             return false;
         }
     }
