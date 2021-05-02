@@ -7,7 +7,7 @@ namespace Windore.Settings.GUI
     // This allows list containing different generic SettingControlFunctions
     internal interface ISettingControlFunction {}
 
-    public class SettingControlFunction<T>
+    public class SettingControlFunction<T> : ISettingControlFunction
     {
         private Func<string, string, UserControl> getUserControl;
 

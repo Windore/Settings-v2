@@ -20,6 +20,7 @@ namespace Windore.Settings.GUI
 
         public SettingsWindow(ISettingsManager manager)
         {
+            CreateDefaultSettingControlFuncs();
             this.manager = manager;
             InitializeComponent();
 #if DEBUG
@@ -88,6 +89,19 @@ namespace Windore.Settings.GUI
             }
 
             return settingControls;
+        }
+
+        private void CreateDefaultSettingControlFuncs() 
+        {
+            controlLookupDict[typeof(bool)] = new SettingControlFunction<bool>((category, name) => 
+            {
+                return new BoolSettingControl(category, name, manager);
+            });
+        }
+
+        public void AddSettingControlFunction<TP>(SettingControlFunction<TP> function) 
+        {
+            controlLookupDict[typeof(TP)] = function;
         }
     }
 }

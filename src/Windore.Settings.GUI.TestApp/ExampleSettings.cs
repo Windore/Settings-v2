@@ -14,5 +14,8 @@ namespace Windore.Settings.GUI.TestApp
         public double Height { get; set; }
         [Setting("Do you agree?", "Other")]
         public bool Agree { get; set; }
+        [Setting("From 1 to 10, How much do you agree?", "Other")]
+        [IntSettingValueLimits(1, 10)]
+        public int Num { get; set;}
     }
 }
