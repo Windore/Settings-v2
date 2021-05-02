@@ -5,7 +5,7 @@ namespace Windore.Settings.Base
 {
     public class StringSettingIsPathAttribute : SettingValueCheckAttribute 
     {
-        public override bool CheckValue(object value)
+        public override bool CheckValue(object value, out string message)
         {
             if (value is string str) 
             {
@@ -22,9 +22,15 @@ namespace Windore.Settings.Base
 
                 if (fi != null && Path.IsPathFullyQualified(str)) 
                 {
+                    message = "";
                     return true;
                 }
+
+                message = "Not a valid path";
+                return false;
             }
+
+            message = "Not a string";
             return false;
         }
     }

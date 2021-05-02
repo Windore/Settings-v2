@@ -47,17 +47,12 @@ namespace Windore.Settings.GUI
         {
             if (input.Text == previousText) return;
             previousText = input.Text;
-
-            // This is not very good, but works. It should be updated later
-            try 
+            
+            if (manager.CheckStringValueForSetting(category, name, input.Text, out string msg)) 
             {
                 manager.SetSettingValueFromString(category, name, input.Text);
-                invalidInputTB.Text = "";
             }
-            catch(ArgumentException) 
-            {
-                invalidInputTB.Text = "Invalid value";
-            }
+            invalidInputTB.Text = msg;
         }
     }
 }
