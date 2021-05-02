@@ -73,11 +73,10 @@ namespace Windore.Settings.Base
             try 
             {
                 value = func.GetType().GetMethod("ConvertFromString").Invoke(func, new [] { stringValue });
-                SetSettingValue(category, settingName, value);
             }
             catch(TargetInvocationException) // This is used so that ArgumentExceptions from ConvertFunctions are thrown
             {
-                message = $"Cannot convert string: '{stringValue}' to type: '{prop.PropertyType}'";
+                message = $"Given value is invalid for this type of setting.";
                 return false;
             }
 
@@ -87,7 +86,7 @@ namespace Windore.Settings.Base
             return valid;
         }
 
-        public bool CheckValueForSetting(string category, string settingName, object value, out string message) 
+        private bool CheckValueForSetting(string category, string settingName, object value, out string message) 
         {
             PropertyInfo prop = categories[category].Settings[settingName];
             

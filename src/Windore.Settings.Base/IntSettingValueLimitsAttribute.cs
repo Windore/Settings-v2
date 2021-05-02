@@ -19,19 +19,19 @@ namespace Windore.Settings.Base
             {
                 if (number < min) 
                 {
-                    message = "Given value is too small";
+                    message = "Given value is too small.";
                     return false;
                 }
                 if (number > max) 
                 {
-                    message = "Given value is too large";
+                    message = "Given value is too large.";
                     return false;
                 }
                 message = "";
                 return true;
             }
 
-            message = "Not a number";
+            message = "Not a number.";
 
             return false;
         }

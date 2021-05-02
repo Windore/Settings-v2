@@ -133,5 +133,82 @@ namespace Windore.Settings.Base.Tests
             manager.SetSettingValue("All", "Forty", 40);
             Assert.AreEqual(40, testObj.IAmForty);
         }
+
+        [Test]
+        public void IntSetting_VerifyTooLarge() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Int", "33", out string msg));
+            Assert.AreEqual("Given value is too large.", msg);
+        }
+
+        [Test]
+        public void IntSetting_VerifyTooSmall() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Int", "-33", out string msg));
+            Assert.AreEqual("Given value is too small.", msg);
+        }
+
+        [Test]
+        public void IntSetting_VerifyValid() 
+        {
+            Assert.AreEqual(true, manager.CheckStringValueForSetting("All", "Int", "16", out string msg));
+            Assert.AreEqual("", msg);
+        }
+
+        [Test]
+        public void IntSetting_VerifyNotANumber() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Int", "wfg", out string msg));
+            Assert.AreEqual("Given value is invalid for this type of setting.", msg);
+        }
+
+        [Test]
+        public void DoubleSetting_VerifyTooLarge() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Double", "3392.75", out string msg));
+            Assert.AreEqual("Given value is too large.", msg);
+        }
+
+        [Test]
+        public void DoubleSetting_VerifyTooSmall() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Double", "-3311.233", out string msg));
+            Assert.AreEqual("Given value is too small.", msg);
+        }
+
+        [Test]
+        public void DoubleSetting_VerifyValid() 
+        {
+            Assert.AreEqual(true, manager.CheckStringValueForSetting("All", "Double", "8.997", out string msg));
+            Assert.AreEqual("", msg);
+        }
+
+        [Test]
+        public void DoubleSetting_VerifyNotANumber() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Double", "wfg", out string msg));
+            Assert.AreEqual("Given value is invalid for this type of setting.", msg);
+        }
+
+        [Test]
+        public void CustomSetting_VerifyNotANumber() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Forty", "wfg", out string msg));
+            Assert.AreEqual("Given value is invalid for this type of setting.", msg);
+        }
+
+        [Test]
+        public void CustomSetting_VerifyInvalid() 
+        {
+            Assert.AreEqual(false, manager.CheckStringValueForSetting("All", "Forty", "39", out string msg));
+            Assert.AreEqual("", msg);
+        }
+
+        [Test]
+        public void CustomSetting_VerifyValid() 
+        {
+            Assert.AreEqual(true, manager.CheckStringValueForSetting("All", "Forty", "40", out string msg));
+            Assert.AreEqual("", msg);
+        }
     }
 }
