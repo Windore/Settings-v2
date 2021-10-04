@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Windore.Settings.GUI.BoolSettingControl">
-  <Grid ColumnDefinitions="300,200" HorizontalAlignment="Left" Margin="5">
+  <Grid ColumnDefinitions="400,200" HorizontalAlignment="Left" Margin="5">
     <TextBlock VerticalAlignment="Center" Name="settingCheckBoxName" Grid.Column="0"></TextBlock>
     <CheckBox Name="settingCheckBox" Click="OnClick" Height="30" Grid.Column="1"/>
   </Grid>

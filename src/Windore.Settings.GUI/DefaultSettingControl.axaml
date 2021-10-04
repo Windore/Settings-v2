@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Windore.Settings.GUI.DefaultSettingControl">
-  <Grid ColumnDefinitions="300,280,240" HorizontalAlignment="Left" Margin="5">
+  <Grid ColumnDefinitions="400,280,240" HorizontalAlignment="Left" Margin="5">
     <TextBlock Name="settingNameTB" VerticalAlignment="Center" Grid.Column="0"></TextBlock>
     <TextBox AcceptsReturn="False" AcceptsTab="False" Name="settingInputTB" Height="28" Grid.Column="1"></TextBox>
     <TextBlock Margin="5,0,0,0" Name="invalidTB" Foreground="Red" VerticalAlignment="Center" TextWrapping="Wrap" Grid.Column="2"></TextBlock>
